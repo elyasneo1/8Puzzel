@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            font-family: "dejavu sans mono";
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            background-color: #222222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0px;
+        }
+
+        .board {
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            background-color: #333333;
+            border-radius: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 90px 90px 90px;
+            grid-template-rows: 90px 90px 90px;
+            border-style: solid;
+            border-color: #555555;
+            border-width: 2px;
+        }
+
+        .grid button {
+            background-color: #444444;
+            outline: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+            width: 76px;
+            height: 76px;
+            border: 2px solid #555555;
+            line-height: 76px;
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .options button {
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            width: 80px;
+            background-color: #b38600;
+            color: #555555;
+            outline: none;
+            cursor: pointer;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .options button:hover {
+            color: #b38600;
+            background-color: #555555;
+        }
+
+        .footer p {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+            color: #b38600;
+            font-weight: bold;
+            margin: auto 0;
+        }
+
+        .message {
+            color: goldenrod;
+            height: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game">
+        <div class="board">
+            <div class="grid">
+                <button>1</button>
+                <button name="2">2</button>
+                <button name="3">3</button>
+                <button name="4">4</button>
+                <button name="5">5</button>
+                <button name="6">6</button>
+                <button name="7">7</button>
+                <button name="8">8</button>
+                <button></button>
+            </div>
+            <div class="footer">
+                <p id="move">Move:100</p>
+                <p id="time">Time:100</p>
+            </div>
+        </div>
+        <div class="options">
+            <button id="play">Play</button>
+        </div>
+    </div>
+    <h1 class="message">You win!</h1>
+
+    <script>
+        const playButton = document.getElementById("play");
+        playButton.addEventListener("click", buttonAction);
+
+        class Node {
+            constructor(parent, value) {
+                this.parent = parent;
+                this.value = value;
+            }
+        }
+
+        class Cell {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+
+            getTopCell() {
+                if (this.y == 0) {
+                    return null;
+                } else {
+                    return new Cell(this.x, this.y - 1);
+                }
+            }
+
+            getRightCell() {
+                if (this.x == 2) {
+                    return null;
+                } else {
+                    return new Cell(this.x + 1, this.y);
+                }
+            }
+
+            getBottomCell() {
+                if (this.y == 2) {
+                    return null;
+                } else {
+                    return new Cell(this.x, this.y + 1);
+                }
+            }
+
+            getLeftCell() {
+                if (this.x == 0) {
+                    return null;
+                } else {
+                    return new Cell(this.x - 1, this.y);
+                }
+            }
+
+            move() {
+                return [
+                    this.getTopCell(),
+                    this.getBottomCell(),
+                    this.getRightCell(),
+                    this.getLeftCell()
+                ].filter(Cell => Cell != null);
+            }
+
+            randomMove() {
+                const moveChoice = this.move();
+                return moveChoice[Math.floor(Math.random() * moveChoice.length)];
+            }
+
+        }
+
+        function isSolved(grid) {
+            return (
+                grid[0][0] == 1 &&
+                grid[0][1] == 2 &&
+                grid[0][2] == 3 &&
+                grid[1][0] == 4 &&
+                grid[1][1] == 5 &&
+                grid[1][2] == 6 &&
+                grid[2][0] == 7 &&
+                grid[2][1] == 8 &&
+                grid[2][2] == 0
+            );
+        };
+
+        function swap(grid, blank, move) {
+            let temp = grid[blank.y][blank.x];
+            grid[blank.y][blank.x] = grid[move.y][move.x];
+            grid[move.y][move.x] = temp;
+        }
+
+        function getRandomGrid() {
+            let grid = [
+                [1, 2, 3],
+                [4, 5, 6],
+                [7, 8, 0]
+            ];
+            let blank = new Cell(2, 2);
+
+            // shufle
+            for (let i = 0; i < 1; i++) {
+                const randomMove = blank.randomMove();
+                swap(grid, blank, randomMove);
+                blank = randomMove;
+            }
+
+            if (isSolved(grid)) {
+                return getRandomGrid();
+            }
+
+            return grid;
+        }
+
+        class State {
+            constructor(grid, move, time, status) {
+                this.grid = grid;
+                this.move = move;
+                this.time = time;
+                this.status = status;
+            }
+
+            static ready() {
+                return new State([
+                    [0, 0, 0],
+                    [0, 0, 0],
+                    [0, 0, 0]
+                ], 0, 0, "ready");
+            }
+
+            static start(grid) {
+                return new State(grid, 0, 0, "playing");
+            }
+        }
+
+        function changeColor() {
+            document.querySelectorAll(".grid button").forEach(element => {
+                if (element.textContent == 0) {
+                    element.style.color = "black";
+                    element.style.background = "#333333";
+                } else {
+                    if (element.textContent == element.className) {
+                        element.style.color = "#00ff00";
+                    } else {
+                        element.style.color = "#ff0000";
+                    }
+                }
+            });
+
+        }
+        var tickId = undefined;
+        var intId = undefined;
+        var intId1 = undefined;
+        var timeSpeed = 1000;
+        class Game {
+            constructor(state) {
+                this.state = state;
+                this.tickId = null;
+                this.tick = this.tick.bind(this);
+                this.render();
+                this.handleClickBox = this.handleClickBox.bind(this);
+            }
+
+            static ready() {
+                return new Game(State.ready());
+            }
+
+            setState(newState) {
+                this.state = {
+                    ...this.state,
+                    ...newState
+                };
+                this.render();
+            }
+
+            tick() {
+                this.setState({
+                    time: this.state.time + 1
+                });
+                changeColor();
+            }
+
+            handleClickBox(cell) {
+                return function () {
+                    const move = cell.move();
+                    const blank = move.find(
+                        place => this.state.grid[place.y][place.x] == 0
+                    );
+                    if (blank) {
+                        const newGrid = [...this.state.grid];
+                        swap(newGrid, cell, blank);
+                        if (isSolved(newGrid)) {
+                            clearInterval(this.tickId);
+                            this.setState({
+                                status: "won",
+                                grid: newGrid,
+                                move: this.state.move + 1
+                            });
+                        } else {
+                            this.setState({
+                                grid: newGrid,
+                                move: this.state.move + 1
+                            });
+                        }
+                    }
+                    changeColor();
+                }.bind(this);
+            }
+
+            render() {
+                const {
+                    grid,
+                    move,
+                    time,
+                    status
+                } = this.state;
+
+                // Render grid
+                const newGrid = document.createElement("div");
+                newGrid.className = "grid";
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        const button = document.createElement("button");
+                        button.className = i * 3 + j + 1;
+                        // if (status == "playing") {
+                        //     button.addEventListener("click", this.handleClickBox(new Cell(j, i)));
+                        // }
+                        button.textContent = grid[i][j].toString();
+                        newGrid.appendChild(button);
+                    }
+                }
+                document.querySelector(".grid").replaceWith(newGrid);
+
+                // Render move
+                document.getElementById("move").textContent = `Move: ${move}`;
+
+                // Render time
+                document.getElementById("time").textContent = `Time: ${time}`;
+
+                // Render message
+                if (status == "won") {
+                    document.querySelector(".message").textContent = "You win!";
+                } else {
+                    document.querySelector(".message").textContent = "";
+                }
+            }
+        }
+
+        const GAME = Game.ready();
+        async function startToSolve(startNode) {
+            var road = await getRoad(startNode);
+            GAME.setState(State.start(road[0].value));
+            changeColor();
+            road.shift();
+            intId = setInterval(function () {
+                GAME.setState({
+                    grid: road.shift().value,
+                    move: GAME.state.move + 1
+                })
+                changeColor();
+                if (road.length === 0) {
+                    clearInterval(intId);
+                    clearInterval(GAME.tickId);
+                    GAME.setState({
+                        status: "won",
+                    });
+                    changeColor();
+                    buttonAction();
+                }
+            }, timeSpeed);
+        }
+
+
+        function findBlankInGridASCell(grid) {
+            var blank;
+            for (let i = 0; i <= 2; i++) {
+                for (let j = 0; j <= 2; j++) {
+                    if (grid[i][j] == 0)
+                        blank = new Cell(i, j);
+                }
+            }
+            return blank;
+        }
+
+        function mSwap(grid, blank, move) {
+            [grid[blank.x][blank.y], grid[move.x][move.y]] = [grid[move.x][move.y], grid[blank.x][blank.y]]
+        }
+
+        function alternative(grid) {
+            var blank = findBlankInGridASCell(grid.value);
+            const moveChoices = blank.move();
+            var childs = createChild(grid, blank, moveChoices);
+            return childs;
+        }
+
+        function createChild(grid, blank, moves) {
+            var childs = [];
+            for (let move of moves) {
+                var child = copyGrid(grid.value);
+                mSwap(child, blank, move);
+                childs.push(new Node(grid, child));
+            }
+            return childs;
+        }
+
+        function copyGrid(grid) {
+            var mGrid = [];
+            for (var i = 0; i < grid.length; i++)
+                mGrid[i] = grid[i].slice();
+            return mGrid;
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////// search Algorithm ///////////////////////////////////////////////////  
+        function BDS(start, target) {
+
+        }
+
+        function BFS(start) {
+            return new Promise(resolve => {
+                var q = [start];
+                intId1 = setInterval(function () {
+                    current = q.shift();
+                    GAME.setState({
+                        grid: current.value,
+                        move: GAME.state.move + 1,
+                        status: "playing"
+                    })
+                    changeColor();
+                    if (isSolved(current.value)) {
+                        clearInterval(intId1);
+                        clearInterval(GAME.tickId);
+
+                        changeColor();
+                        return resolve(current);
+                    } else {
+                        addToQ(q, alternative(current))
+                    }
+                }, timeSpeed / 100);
+            })
+
+        }
+
+        function addToQ(base, arr) {
+            arr.forEach(element => {
+                base.push(element);
+            });
+        }
+
+        async function getRoad(startNode) {
+            return new Promise(async resolve => {
+                let targetNode = await BFS(startNode);
+                var road = [targetNode];
+
+                console.log(road);
+                while (targetNode.parent != 0) {
+                    road.push(targetNode.parent);
+                    targetNode = targetNode.parent;
+                }
+
+                return resolve(road.reverse())
+            })
+
+
+        }
+
+        function buttonAction() {
+            if (GAME.state.status == "playing") {
+                playButton.textContent = "play";
+                clearInterval(tickId);
+                clearInterval(intId);
+                clearInterval(intId1);
+                GAME.setState({
+                    grid: [
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0]
+                    ],
+                    status: "ready",
+                    move: 0,
+                    time: 0
+                })
+            } else if (GAME.state.status == "ready") {
+                playButton.textContent = "reset";
+                tickId = setInterval(GAME.tick, 1000);
+                changeColor();
+                startToSolve(new Node(0, [
+                    [0, 2, 3],
+                    [1, 5, 6],
+                    [4, 7, 8]
+                ]));
+                // [[5, 0, 3], [2, 1, 7], [4, 8, 6]] high
+                // [[0, 2, 6], [1, 3, 5], [4, 7, 8]] medium 21743
+                // [[0, 2, 3], [1, 5, 6], [4, 7, 8]] small 110
+            } else if (GAME.state.status == "won") {
+                playButton.textContent = "play";
+                clearInterval(tickId);
+                clearInterval(intId);
+                clearInterval(intId1);
+                GAME.setState({
+                    status: "ready"
+                })
+                changeColor();
+            }
+        }
+
+        // function sleep(milliseconds) {
+        //     var start = new Date().getTime();
+        //     for (var i = 0; i < 1e7; i++) {
+        //         if ((new Date().getTime() - start) > milliseconds) {
+        //             break;
+        //         }
+        //     }
+        // }
+    </script>
+</body>
+
+</html>
