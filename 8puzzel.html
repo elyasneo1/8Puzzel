@@ -369,7 +369,11 @@
         ///////////////////////////////////////////////////////////////////////////Start to Solve////////////////////////////////////////////////////
 
         async function startToSolve(startNode) {
-            var mStartNode = await BDS(startNode,new Node(0,[[1,2,3],[4,5,6],[7,8,0]]))
+            var mStartNode = await BDS(startNode, new Node(0, [
+                [1, 2, 3],
+                [4, 5, 6],
+                [7, 8, 0]
+            ]))
             var road = getRoad(mStartNode);
             GAME.setState(State.start(road[0].value));
             changeColor();
@@ -426,14 +430,16 @@
         }
 
         function contains(array, node) {
-            for (let i = 0; i < array.length; i++) {
-                
-                console.log(array[i].value.toString()+" "+node.value.toString()); 
-                if (array[i].value.toString() === node.value.toString()) {
-                    return i
-                }
-            }
-            return -1
+            //             for (let i = 0; i < array.length; i++) {
+            //  if (array[i].value.toString() === node.value.toString()) {
+            //                     return i
+            //                 }
+            //             }
+            //             return -1
+           var r = array.find(e => {
+                return e.value.toString() === node.value.toString()
+            })
+            return r;
         }
 
         function copyGrid(grid) {
@@ -454,7 +460,7 @@
                 var startVisited = []
                 var targetVisited = []
                 intId1 = setInterval(function () {
-                   var current = qStart.shift();
+                    var current = qStart.shift();
                     GAME.setState({
                         grid: current.value,
                         move: GAME.state.move + 1,
@@ -462,39 +468,43 @@
                     })
                     changeColor();
                     var index = contains(targetVisited, current);
-                    if (index != -1) {
+                    if (index) {
                         clearInterval(intId1);
+
                         clearInterval(GAME.tickId);
                         changeColor();
                         res.fromStart = current
-                        res.fromEnd = targetVisited[index]
+                        res.fromEnd = index
                         return resolve(res);
                     } else {
                         addToQ(qStart, alternative(current))
                         startVisited.push(current)
                     }
-                   var current = qTarget.pop();
+
+
+                    var current = qTarget.pop();
                     // GAME.setState({
                     //     grid: current.value,
                     //     move: GAME.state.move + 1,
                     //     status: "playing"
                     // })
-                    changeColor();
-                  var index = contains(startVisited, current);
-                    if (index != -1) {
+                    // changeColor();
+                    var index = contains(startVisited, current);
+                    if (index) {
                         clearInterval(intId1);
+
                         clearInterval(GAME.tickId);
                         changeColor();
                         res.fromStart = current
-                        res.fromEnd = startVisited[index]
+                        res.fromEnd = index
                         return resolve(res);
                     } else {
                         addToQ(qTarget, alternative(current))
                         targetVisited.push(current)
                     }
 
+                }, 2);
 
-                }, 0);
             })
         }
 
@@ -539,20 +549,20 @@
                 }
                 return road.reverse()
             } else {
-                var sRoad=[] 
-                var fromStart=mTargetNode.fromStart;
-                while(fromStart.parent!=0){
+                var sRoad = []
+                var fromStart = mTargetNode.fromStart;
+                while (fromStart.parent != 0) {
                     sRoad.push(fromStart.parent)
-                    fromStart=fromStart.parent
+                    fromStart = fromStart.parent
                 }
-                var eRoad=[mTargetNode.fromEnd] 
-                var fromEnd=mTargetNode.fromEnd;
-                while(fromEnd.parent!=0){
+                var eRoad = [mTargetNode.fromEnd]
+                var fromEnd = mTargetNode.fromEnd;
+                while (fromEnd.parent != 0) {
                     eRoad.push(fromStart.parent)
-                    fromEnd=fromEnd.parent
+                    fromEnd = fromEnd.parent
                 }
-                 var res=[...sRoad.reverse(),...eRoad]
-                 return res;
+                var res = [...sRoad.reverse(), ...eRoad]
+                return res;
             }
 
 
@@ -578,11 +588,7 @@
                 playButton.textContent = "reset";
                 tickId = setInterval(GAME.tick, 1000);
                 changeColor();
-                startToSolve(new Node(0, [
-                    [0, 2, 3],
-                    [1, 5, 6],
-                    [4, 7, 8]
-                ]));
+                startToSolve(new Node(0, [[0, 2, 6], [1, 3, 5], [4, 7, 8]]));
                 // [[5, 0, 3], [2, 1, 7], [4, 8, 6]] high
                 // [[0, 2, 6], [1, 3, 5], [4, 7, 8]] medium 21743
                 // [[0, 2, 3], [1, 5, 6], [4, 7, 8]] small 110
