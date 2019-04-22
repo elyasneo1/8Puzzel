@@ -375,8 +375,10 @@
                 [7, 8, 0]
             ]))
             var road = getRoad(mStartNode);
+            sleep(1000);
             GAME.setState(State.start(road[0].value));
             changeColor();
+            sleep(1000);
             road.shift();
             intId = setInterval(function () {
                 GAME.setState({
@@ -436,7 +438,7 @@
             //                 }
             //             }
             //             return -1
-           var r = array.find(e => {
+            var r = array.find(e => {
                 return e.value.toString() === node.value.toString()
             })
             return r;
@@ -449,8 +451,8 @@
             return mGrid;
         }
         function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-  }
+            array.sort(() => Math.random() - 0.5);
+        }
         ///////////////////////////////////////////////////////////////////////////////////////// search Algorithm ///////////////////////////////////////////////////  
         function BDS(start, target) {
             return new Promise(resolve => {
@@ -481,12 +483,12 @@
                         return resolve(res);
                     } else {
                         addToQ(qStart, alternative(current))
-                        if(!contains(startVisited,current))
-                        startVisited.push(current)
+                        if (!contains(startVisited, current))
+                            startVisited.push(current)
                     }
 
 
-                    var current = qTarget.pop();
+                    var current = qTarget.shift();
                     GAME.setState({
                         grid: current.value,
                         move: GAME.state.move + 1,
@@ -503,13 +505,13 @@
                         res.fromEnd = index
                         return resolve(res);
                     } else {
-                       
+
                         console.log(current.value);
-                        var childs=alternative(current)
-                     //   shuffle(childs)
-                        addToQ(qTarget,childs )
-                        if(!contains(targetVisited,current))
-                        targetVisited.push(current)
+                        var childs = alternative(current)
+                        //   shuffle(childs)
+                        addToQ(qTarget, childs)
+                        if (!contains(targetVisited, current))
+                            targetVisited.push(current)
                     }
 
                 }, 2);
@@ -571,6 +573,8 @@
                     fromEnd = fromEnd.parent
                 }
                 var res = [...sRoad.reverse(), ...eRoad]
+                if (isSolved(res[0].value))
+                    res.reverse()
                 return res;
             }
 
@@ -597,7 +601,7 @@
                 playButton.textContent = "reset";
                 tickId = setInterval(GAME.tick, 1000);
                 changeColor();
-                startToSolve(new Node(0,[[0, 2, 6], [1, 3, 5], [4, 7, 8]] ));
+                startToSolve(new Node(0,[[0, 2, 6], [1, 3, 5], [4, 7, 8]]));
                 // [[5, 0, 3], [2, 1, 7], [4, 8, 6]] high
                 // [[0, 2, 6], [1, 3, 5], [4, 7, 8]] medium 21743
                 // [[0, 2, 3], [1, 5, 6], [4, 7, 8]] small 110
@@ -613,14 +617,14 @@
             }
         }
 
-        // function sleep(milliseconds) {
-        //     var start = new Date().getTime();
-        //     for (var i = 0; i < 1e7; i++) {
-        //         if ((new Date().getTime() - start) > milliseconds) {
-        //             break;
-        //         }
-        //     }
-        // }
+        function sleep(milliseconds) {
+            var start = new Date().getTime();
+            for (var i = 0; i < 1e7; i++) {
+                if ((new Date().getTime() - start) > milliseconds) {
+                    break;
+                }
+            }
+        }
     </script>
 </body>
 
