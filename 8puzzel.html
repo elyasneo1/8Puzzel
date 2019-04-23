@@ -131,6 +131,7 @@
             constructor(parent, value) {
                 this.parent = parent;
                 this.value = value;
+                this.depth = 0;
             }
         }
 
@@ -365,16 +366,16 @@
         }
 
         const GAME = Game.ready();
-
         ///////////////////////////////////////////////////////////////////////////Start to Solve////////////////////////////////////////////////////
-
         async function startToSolve(startNode) {
-            var mStartNode = await BDS(startNode, new Node(0, [
-                [1, 2, 3],
-                [4, 5, 6],
-                [7, 8, 0]
-            ]))
+            // var mStartNode = await BDS(startNode, new Node(0, [
+            //     [1, 2, 3],
+            //     [4, 5, 6],
+            //     [7, 8, 0]
+            // ]))
+            var mStartNode = await DLS(startNode, 1)
             var road = getRoad(mStartNode);
+            sleep(2000);
             GAME.setState(State.start(road[0].value));
             changeColor();
             road.shift();
@@ -395,7 +396,6 @@
                 }
             }, timeSpeed);
         }
-
 
         function findBlankInGridASCell(grid) {
             var blank;
@@ -424,7 +424,9 @@
             for (let move of moves) {
                 var child = copyGrid(grid.value);
                 mSwap(child, blank, move);
-                childs.push(new Node(grid, child));
+                newChild = new Node(grid, child)
+                newChild.depth = newChild.parent.depth + 1;
+                childs.push(newChild);
             }
             return childs;
         }
@@ -436,7 +438,7 @@
             //                 }
             //             }
             //             return -1
-           var r = array.find(e => {
+            var r = array.find(e => {
                 return e.value.toString() === node.value.toString()
             })
             return r;
@@ -448,9 +450,10 @@
                 mGrid[i] = grid[i].slice();
             return mGrid;
         }
+
         function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-  }
+            array.sort(() => Math.random() - 0.5);
+        }
         ///////////////////////////////////////////////////////////////////////////////////////// search Algorithm ///////////////////////////////////////////////////  
         function BDS(start, target) {
             return new Promise(resolve => {
@@ -481,8 +484,8 @@
                         return resolve(res);
                     } else {
                         addToQ(qStart, alternative(current))
-                        if(!contains(startVisited,current))
-                        startVisited.push(current)
+                        if (!contains(startVisited, current))
+                            startVisited.push(current)
                     }
 
 
@@ -503,13 +506,13 @@
                         res.fromEnd = index
                         return resolve(res);
                     } else {
-                       
+
                         console.log(current.value);
-                        var childs=alternative(current)
-                     //   shuffle(childs)
-                        addToQ(qTarget,childs )
-                        if(!contains(targetVisited,current))
-                        targetVisited.push(current)
+                        var childs = alternative(current)
+                        // shuffle(childs)
+                        addToQ(qTarget, childs)
+                        if (!contains(targetVisited, current))
+                            targetVisited.push(current)
                     }
 
                 }, 2);
@@ -597,10 +600,10 @@
                 playButton.textContent = "reset";
                 tickId = setInterval(GAME.tick, 1000);
                 changeColor();
-                startToSolve(new Node(0,[[0, 2, 6], [1, 3, 5], [4, 7, 8]] ));
+                startToSolve(new Node(0, [[0, 2, 3], [1, 5, 6], [4, 7, 8]]));
                 // [[5, 0, 3], [2, 1, 7], [4, 8, 6]] high
                 // [[0, 2, 6], [1, 3, 5], [4, 7, 8]] medium 21743
-                // [[0, 2, 3], [1, 5, 6], [4, 7, 8]] small 110
+                // [[0, 2, 3], [1, 5, 6], [4, 7, 8]] small 63
             } else if (GAME.state.status == "won") {
                 playButton.textContent = "play";
                 clearInterval(tickId);
@@ -613,14 +616,76 @@
             }
         }
 
-        // function sleep(milliseconds) {
-        //     var start = new Date().getTime();
-        //     for (var i = 0; i < 1e7; i++) {
-        //         if ((new Date().getTime() - start) > milliseconds) {
-        //             break;
-        //         }
-        //     }
-        // }
+        function DLS(start, depthLimit) {
+            return new Promise(resolve => {
+                var q = [start];
+                intId1 = setInterval(function () {
+                    current = q.pop();
+                    if (current.depth < depthLimit) {
+                        GAME.setState({
+                            grid: current.value,
+                            move: GAME.state.move + 1,
+                            status: "playing"
+                        })
+                        changeColor();
+                        if (isSolved(current.value)) {
+                            clearInterval(intId1);
+                            clearInterval(GAME.tickId);
+                            changeColor();
+                            return resolve(current);
+                        } else {
+                            addToQ(q, alternative(current))
+                        }
+                    }
+                    if (q.length == 0) {
+                        clearInterval(intId1);
+                        clearInterval(GAME.tickId);
+                        changeColor();
+                        return resolve(start);
+                    }
+                }, timeSpeed / 100)
+            })
+        }
+
+        function IDS(start, depthLimit) {
+            return new Promise(resolve => {
+                let q = [start];
+                intId1 = setInterval(function () {
+                    current = q.pop();
+                    if (current.depth < depthLimit) {
+                        GAME.setState({
+                            grid: current.value,
+                            move: GAME.state.move + 1,
+                            status: "playing"
+                        })
+                        changeColor();
+                        if (isSolved(current.value)) {
+                            clearInterval(intId1);
+                            clearInterval(GAME.tickId);
+                            changeColor();
+                            return resolve(current);
+                        } else {
+                            addToQ(q, alternative(current))
+                        }
+                    }
+                    if (q.length == 0) {
+                        q.push(start);
+                        console.log("not found in depth " + depthLimit);
+
+                        depthLimit = depthLimit + 1;
+                    }
+                }, timeSpeed / 100)
+            })
+        }
+
+        function sleep(milliseconds) {
+            var start = new Date().getTime();
+            for (var i = 0; i < 1e7; i++) {
+                if ((new Date().getTime() - start) > milliseconds) {
+                    break;
+                }
+            }
+        }
     </script>
 </body>
 
