@@ -378,6 +378,7 @@
             sleep(2000);
             GAME.setState(State.start(road[0].value));
             changeColor();
+            sleep(1000);
             road.shift();
             intId = setInterval(function () {
                 GAME.setState({
@@ -489,7 +490,7 @@
                     }
 
 
-                    var current = qTarget.pop();
+                    var current = qTarget.shift();
                     GAME.setState({
                         grid: current.value,
                         move: GAME.state.move + 1,
@@ -574,6 +575,8 @@
                     fromEnd = fromEnd.parent
                 }
                 var res = [...sRoad.reverse(), ...eRoad]
+                if (isSolved(res[0].value))
+                    res.reverse()
                 return res;
             }
 
