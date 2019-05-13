@@ -252,12 +252,26 @@
                     </div>
                 </li>
                 <li>
-                        <input type="radio" id="Astar-option" name="selector" value="Astar">
-                        <label for="Astar-option">Astar</label>
-                        <div class="check">
-                            <div class="inside"></div>
-                        </div>
-                    </li>
+                    <input type="radio" id="Astar-option" name="selector" value="Astar">
+                    <label for="Astar-option">Astar</label>
+                    <div class="check">
+                        <div class="inside"></div>
+                    </div>
+                </li>
+                <li>
+                    <input type="radio" id="Greedy-option" name="selector" value="Greedy">
+                    <label for="Greedy-option">Greedy</label>
+                    <div class="check">
+                        <div class="inside"></div>
+                    </div>
+                </li>
+                <li>
+                    <input type="radio" id="IDAstar-option" name="selector" value="IDAstar">
+                    <label for="IDAstar-option">IDAstar</label>
+                    <div class="check">
+                        <div class="inside"></div>
+                    </div>
+                </li>
             </ul>
         </div>
         <div class="game">
@@ -288,7 +302,6 @@
     <h1 class="message">You win!</h1>
     </div>
     <script>
-
         const playButton = document.getElementById("play");
         playButton.addEventListener("click", buttonAction);
 
@@ -549,6 +562,20 @@
                     [7, 8, 0]
                 ]));
             }
+            if (document.getElementById("Greedy-option").checked) {
+                mStartNode = await Greedy(startNode, new Node(0, [
+                    [1, 2, 3],
+                    [4, 5, 6],
+                    [7, 8, 0]
+                ]));
+            }
+            if (document.getElementById("IDAstar-option").checked) {
+                mStartNode = await IDA_Star(startNode, new Node(0, [
+                    [1, 2, 3],
+                    [4, 5, 6],
+                    [7, 8, 0]
+                ]));
+            }
             if (document.getElementById("BDS-option").checked) {
                 mStartNode = await BDS(startNode, new Node(0, [
                     [1, 2, 3],
@@ -719,7 +746,8 @@
                     (left(node) < this.size() && this._greater(left(node), node)) ||
                     (right(node) < this.size() && this._greater(right(node), node))
                 ) {
-                    let maxChild = (right(node) < this.size() && this._greater(right(node), left(node))) ? right(node) : left(node);
+                    let maxChild = (right(node) < this.size() && this._greater(right(node), left(node))) ? right(
+                        node) : left(node);
                     this._swap(node, maxChild);
                     node = maxChild;
                 }
@@ -744,12 +772,74 @@
 
         function A_Star(start, target) {
             return new Promise(resolve => {
-                var q = new PriorityQueue();
+                var q = new PriorityQueue((a, b) => a.f < b.f);
                 q.push(start)
                 intId1 = setInterval(function () {
                     current = q.pop();
                     console.log(current);
 
+                    GAME.setState({
+                        grid: current.value,
+                        move: GAME.state.move + 1,
+                        status: "playing"
+                    })
+                    changeColor();
+                    if (isSolved(current.value)) {
+                        clearInterval(GAME.tickId);
+                        changeColor();
+                        clearInterval(intId1);
+                        return resolve(current);
+                    } else {
+                        addToQ(q, alternative(current))
+                    }
+                }, 2);
+            })
+
+        }
+
+        function IDA_Star(start, target) {
+            return new Promise(resolve => {
+                var q = new PriorityQueue((a, b) => a.f < b.f);
+                var fLimit = start.f        
+                q.push(start)
+                intId1 = setInterval(function () {
+                    current = q.pop();
+                    console.log(current);
+            
+                    if (current.f <= fLimit) {
+                        GAME.setState({
+                            grid: current.value,
+                            move: GAME.state.move + 1,
+                            status: "playing"
+                        })
+                        changeColor();
+                        if (isSolved(current.value)) {
+                            clearInterval(GAME.tickId);
+                            changeColor();
+                            clearInterval(intId1);
+                            return resolve(current);
+                        } else {
+                            addToQ(q, alternative(current))
+                        }
+                    }
+                    if (q._heap.length == 0) {
+                        q.push(start)
+                        isGetFirstBigger = false;
+                        fLimit++;
+                    }
+
+                }, 2);
+            })
+
+        }
+
+        function Greedy(start, target) {
+            return new Promise(resolve => {
+                var q = new PriorityQueue((a, b) => a.h < b.h);
+                q.push(start)
+                intId1 = setInterval(function () {
+                    current = q.pop();
+                    console.log(current);
                     GAME.setState({
                         grid: current.value,
                         move: GAME.state.move + 1,
@@ -919,7 +1009,11 @@
                 playButton.textContent = "reset";
                 tickId = setInterval(GAME.tick, 1000);
                 changeColor();
-                startToSolve(new Node(0, [[5, 0, 3], [2, 1, 7], [4, 8, 6]]));
+                startToSolve(new Node(0, [
+                    [5, 0, 3],
+                    [2, 1, 7],
+                    [4, 8, 6]
+                ]));
                 // [[5, 0, 3], [2, 1, 7], [4, 8, 6]] high
                 // [[0, 2, 6], [1, 3, 5], [4, 7, 8]] medium 21743
                 // [[0, 2, 3], [1, 5, 6], [4, 7, 8]] small 63
@@ -990,7 +1084,6 @@
                     if (q.length == 0) {
                         q.push(start);
                         console.log("not found in depth " + depthLimit);
-
                         depthLimit = depthLimit + 1;
                     }
                 }, timeSpeed / 100)
