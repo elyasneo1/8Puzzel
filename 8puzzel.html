@@ -25,6 +25,24 @@
             margin: 0px;
         }
 
+        .game {
+            margin: auto 0;
+        }
+
+        .game-options {
+            width: 300px;
+            margin: auto 0;
+            margin-right: 30px;
+        }
+
+        .puzzel {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row;
+        }
+
         .board {
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
             padding: 15px;
@@ -61,6 +79,12 @@
             justify-content: space-between;
         }
 
+        .options {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
         .options button {
             border: none;
             font-size: 20px;
@@ -95,35 +119,176 @@
             color: goldenrod;
             height: 80px;
         }
+
+        .container {
+            display: block;
+            height: auto;
+            width: 300px;
+            padding: 0px;
+            margin: auto 0;
+            margin-left: 30px;
+        }
+
+        h2 {
+            color: #AAAAAA;
+        }
+
+        .container ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        ul li {
+            color: #AAAAAA;
+            display: block;
+            position: relative;
+            float: left;
+            width: 50%;
+            height: 80px;
+            border-bottom: 1px solid #b38600;
+            margin-bottom: 2px;
+            margin-left: 5px;
+        }
+
+        ul li input[type=radio] {
+            position: absolute;
+            visibility: hidden;
+        }
+
+        ul li label {
+            display: block;
+            position: relative;
+            font-weight: 300;
+            font-size: 1.35em;
+            padding: 25px 25px 25px 80px;
+            margin: 10px auto;
+            height: 30px;
+            z-index: 9;
+            cursor: pointer;
+        }
+
+        ul li:hover label {
+            color: #FFFFFF;
+        }
+
+        ul li .check {
+            display: block;
+            position: absolute;
+            border: 5px solid #AAAAAA;
+            border-radius: 100%;
+            height: 25px;
+            width: 25px;
+            top: 30px;
+            left: 20px;
+            z-index: 5;
+            transition: border .25s linear;
+        }
+
+        ul li:hover .check {
+            border: 5px solid #FFFFFF;
+        }
+
+        ul li .check::before {
+            display: block;
+            position: absolute;
+            content: '';
+            border-radius: 100%;
+            height: 15px;
+            width: 15px;
+            top: 5px;
+            left: 5px;
+            margin: auto;
+            transition: background 0.25s linear;
+        }
+
+        input[type=radio]:checked~.check {
+            border: 5px solid #b38600;
+        }
+
+        input[type=radio]:checked~.check::before {
+            background: #b38600;
+        }
+
+        input[type=radio]:checked~label {
+            color: #b38600;
+        }
     </style>
 </head>
 
 <body>
-    <div class="game">
-        <div class="board">
-            <div class="grid">
-                <button>1</button>
-                <button name="2">2</button>
-                <button name="3">3</button>
-                <button name="4">4</button>
-                <button name="5">5</button>
-                <button name="6">6</button>
-                <button name="7">7</button>
-                <button name="8">8</button>
-                <button></button>
-            </div>
-            <div class="footer">
-                <p id="move">Move:100</p>
-                <p id="time">Time:100</p>
+    <div class="puzzel">
+        <div class="container board">
+            <ul>
+                <li>
+                    <input type="radio" id="BFS-option" name="selector" value="BFS">
+                    <label for="BFS-option">BFS</label>
+                    <div class="check"></div>
+                </li>
+
+                <li>
+                    <input type="radio" id="DLS-option" name="selector" value="DLS">
+                    <label for="DLS-option">DLS</label>
+                    <div class="check">
+                        <div class="inside"></div>
+                    </div>
+                </li>
+
+                <li>
+                    <input type="radio" id="IDS-option" name="selector" value="IDS">
+                    <label for="IDS-option">IDS</label>
+                    <div class="check">
+                        <div class="inside"></div>
+                    </div>
+                </li>
+
+                <li>
+                    <input type="radio" id="BDS-option" name="selector" value="BDS">
+                    <label for="BDS-option">BDS</label>
+                    <div class="check">
+                        <div class="inside"></div>
+                    </div>
+                </li>
+                <li>
+                        <input type="radio" id="Astar-option" name="selector" value="Astar">
+                        <label for="Astar-option">Astar</label>
+                        <div class="check">
+                            <div class="inside"></div>
+                        </div>
+                    </li>
+            </ul>
+        </div>
+        <div class="game">
+            <div class="board">
+                <div class="grid">
+                    <button>1</button>
+                    <button name="2">2</button>
+                    <button name="3">3</button>
+                    <button name="4">4</button>
+                    <button name="5">5</button>
+                    <button name="6">6</button>
+                    <button name="7">7</button>
+                    <button name="8">8</button>
+                    <button></button>
+                </div>
+                <div class="footer">
+                    <p id="move">Move:100</p>
+                    <p id="time">Time:100</p>
+                </div>
             </div>
         </div>
-        <div class="options">
-            <button id="play">Play</button>
+        <div class="game-options board">
+            <div class="options">
+                <button id="play">Play</button>
+            </div>
         </div>
     </div>
     <h1 class="message">You win!</h1>
-
+    </div>
     <script>
+
         const playButton = document.getElementById("play");
         playButton.addEventListener("click", buttonAction);
 
@@ -132,7 +297,11 @@
                 this.parent = parent;
                 this.value = value;
                 this.depth = 0;
+                this.g = 0;
+                this.h = 0;
+                this.f = 0;
             }
+
         }
 
         class Cell {
@@ -366,36 +535,64 @@
         }
 
         const GAME = Game.ready();
+        document.getElementById("BFS-option").checked = true;
         ///////////////////////////////////////////////////////////////////////////Start to Solve////////////////////////////////////////////////////
         async function startToSolve(startNode) {
-            // var mStartNode = await BDS(startNode, new Node(0, [
-            //     [1, 2, 3],
-            //     [4, 5, 6],
-            //     [7, 8, 0]
-            // ]))
-            var mStartNode = await DLS(startNode, 1)
+            var mStartNode;
+            if (document.getElementById("BFS-option").checked) {
+                mStartNode = await BFS(startNode)
+            }
+            if (document.getElementById("Astar-option").checked) {
+                mStartNode = await A_Star(startNode, new Node(0, [
+                    [1, 2, 3],
+                    [4, 5, 6],
+                    [7, 8, 0]
+                ]));
+            }
+            if (document.getElementById("BDS-option").checked) {
+                mStartNode = await BDS(startNode, new Node(0, [
+                    [1, 2, 3],
+                    [4, 5, 6],
+                    [7, 8, 0]
+                ]));
+            }
+            if (document.getElementById("IDS-option").checked) {
+                mStartNode = await IDS(startNode, 1);
+            }
+            if (document.getElementById("DLS-option").checked) {
+                mStartNode = await DLS(startNode, 10);
+            }
+
             var road = getRoad(mStartNode);
-            sleep(2000);
             GAME.setState(State.start(road[0].value));
             changeColor();
-            sleep(1000);
+            sleep(500);
             road.shift();
-            intId = setInterval(function () {
-                GAME.setState({
-                    grid: road.shift().value,
-                    move: GAME.state.move + 1
-                })
-                changeColor();
-                if (road.length === 0) {
-                    clearInterval(intId);
-                    clearInterval(GAME.tickId);
+            if (road.length != 0) {
+                intId = setInterval(function () {
                     GAME.setState({
-                        status: "won",
-                    });
+                        grid: road.shift().value,
+                        move: GAME.state.move + 1
+                    })
                     changeColor();
-                    buttonAction();
-                }
-            }, timeSpeed);
+                    if (road.length === 0) {
+                        clearInterval(intId);
+                        clearInterval(GAME.tickId);
+                        GAME.setState({
+                            status: "won",
+                        });
+                        changeColor();
+                        buttonAction();
+                    }
+                }, timeSpeed);
+            } else {
+                clearInterval(GAME.tickId);
+                GAME.setState({
+                    status: "playing",
+                });
+                changeColor();
+                buttonAction();
+            }
         }
 
         function findBlankInGridASCell(grid) {
@@ -426,7 +623,12 @@
                 var child = copyGrid(grid.value);
                 mSwap(child, blank, move);
                 newChild = new Node(grid, child)
-                newChild.depth = newChild.parent.depth + 1;
+                if (newChild.parent != 0) {
+                    newChild.depth = newChild.parent.depth + 1;
+                    newChild.g = newChild.parent.g + 1;
+                }
+                newChild.h = hurestics(newChild)
+                newChild.f = newChild.h + newChild.g
                 childs.push(newChild);
             }
             return childs;
@@ -456,6 +658,117 @@
             array.sort(() => Math.random() - 0.5);
         }
         ///////////////////////////////////////////////////////////////////////////////////////// search Algorithm ///////////////////////////////////////////////////  
+        const mtop = 0;
+        const parent = i => ((i + 1) >>> 1) - 1;
+        const left = i => (i << 1) + 1;
+        const right = i => (i + 1) << 1;
+
+        class PriorityQueue {
+            constructor(comparator = (a, b) => a.f < b.f) {
+                this._heap = [];
+                this._comparator = comparator;
+            }
+            size() {
+                return this._heap.length;
+            }
+            isEmpty() {
+                return this.size() == 0;
+            }
+            peek() {
+                return this._heap[mtop];
+            }
+            push(...values) {
+                values.forEach(value => {
+                    this._heap.push(value);
+                    this._siftUp();
+                });
+                return this.size();
+            }
+            pop() {
+                const poppedValue = this.peek();
+                const bottom = this.size() - 1;
+                if (bottom > mtop) {
+                    this._swap(mtop, bottom);
+                }
+                this._heap.pop();
+                this._siftDown();
+                return poppedValue;
+            }
+            replace(value) {
+                const replacedValue = this.peek();
+                this._heap[mtop] = value;
+                this._siftDown();
+                return replacedValue;
+            }
+            _greater(i, j) {
+                return this._comparator(this._heap[i], this._heap[j]);
+            }
+            _swap(i, j) {
+                [this._heap[i], this._heap[j]] = [this._heap[j], this._heap[i]];
+            }
+            _siftUp() {
+                let node = this.size() - 1;
+                while (node > mtop && this._greater(node, parent(node))) {
+                    this._swap(node, parent(node));
+                    node = parent(node);
+                }
+            }
+            _siftDown() {
+                let node = mtop;
+                while (
+                    (left(node) < this.size() && this._greater(left(node), node)) ||
+                    (right(node) < this.size() && this._greater(right(node), node))
+                ) {
+                    let maxChild = (right(node) < this.size() && this._greater(right(node), left(node))) ? right(node) : left(node);
+                    this._swap(node, maxChild);
+                    node = maxChild;
+                }
+            }
+        }
+
+
+        function hurestics(node) {
+            var sum = 0;
+            for (var i = 0; i < node.value.length; i++) {
+                for (var j = 0; j < node.value.length; j++) {
+                    if (node.value[i][j] != 0) {
+                        var x = node.value[i][j] / 3;
+                        var y = (node.value[i][j] % 3) - 1;
+                        var s = Math.abs(x - i) + Math.abs(y - j)
+                        sum += s;
+                    }
+                }
+            }
+            return sum;
+        }
+
+        function A_Star(start, target) {
+            return new Promise(resolve => {
+                var q = new PriorityQueue();
+                q.push(start)
+                intId1 = setInterval(function () {
+                    current = q.pop();
+                    console.log(current);
+
+                    GAME.setState({
+                        grid: current.value,
+                        move: GAME.state.move + 1,
+                        status: "playing"
+                    })
+                    changeColor();
+                    if (isSolved(current.value)) {
+                        clearInterval(GAME.tickId);
+                        changeColor();
+                        clearInterval(intId1);
+                        return resolve(current);
+                    } else {
+                        addToQ(q, alternative(current))
+                    }
+                }, 2);
+            })
+
+        }
+
         function BDS(start, target) {
             return new Promise(resolve => {
                 var res = {
@@ -477,7 +790,6 @@
                     var index = contains(targetVisited, current);
                     if (index) {
                         clearInterval(intId1);
-
                         clearInterval(GAME.tickId);
                         changeColor();
                         res.fromStart = current
@@ -533,14 +845,16 @@
                     })
                     changeColor();
                     if (isSolved(current.value)) {
-                        clearInterval(intId1);
                         clearInterval(GAME.tickId);
                         changeColor();
+                        clearInterval(intId1);
+
+
                         return resolve(current);
                     } else {
                         addToQ(q, alternative(current))
                     }
-                }, timeSpeed / 100);
+                }, 2);
             })
 
         }
@@ -557,9 +871,11 @@
                 var road = [targetNode];
                 console.log(road);
                 while (targetNode.parent != 0) {
-                    road.push(targetNode.parent);
+                    if (!contains(road, targetNode.parent))
+                        road.push(targetNode.parent);
                     targetNode = targetNode.parent;
                 }
+
                 return road.reverse()
             } else {
                 var sRoad = []
@@ -603,7 +919,7 @@
                 playButton.textContent = "reset";
                 tickId = setInterval(GAME.tick, 1000);
                 changeColor();
-                startToSolve(new Node(0, [[0, 2, 3], [1, 5, 6], [4, 7, 8]]));
+                startToSolve(new Node(0, [[5, 0, 3], [2, 1, 7], [4, 8, 6]]));
                 // [[5, 0, 3], [2, 1, 7], [4, 8, 6]] high
                 // [[0, 2, 6], [1, 3, 5], [4, 7, 8]] medium 21743
                 // [[0, 2, 3], [1, 5, 6], [4, 7, 8]] small 63
